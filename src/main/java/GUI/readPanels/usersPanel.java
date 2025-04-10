@@ -7,47 +7,59 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class usersPanel extends JTextArea {
-    JScrollPane scrollPane = new JScrollPane(this);
-    ArrayList<String> users = new ArrayList<>();
+public class usersPanel extends JPanel {
+    private JTextArea textArea = new JTextArea();
+    private JScrollPane scrollPane = new JScrollPane(textArea);
+    private ArrayList<String> users = new ArrayList<>();
 
-    public usersPanel(){
-        this.setEditable(false);
-        this.setLineWrap(true);
-        this.setCaretColor(Color.GRAY);
+    public usersPanel() {
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setCaretColor(Color.WHITE);
+        textArea.setBackground(Color.LIGHT_GRAY);
+        textArea.setForeground(Color.WHITE);
+        textArea.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        this.setLayout(new BorderLayout());
+        this.setPreferredSize(new Dimension(150, 300));
+
+        this.add(scrollPane, BorderLayout.CENTER);
     }
-    public void draw(){
-        this.setText("Users online:\n");
 
-        for(String user: users) {
-            this.append(user + "\n");
-        }
-
-        this.setCaretPosition(this.getDocument().getLength());
-        this.revalidate();
-        this.repaint();
-    }
-    public void updateUsers(Users users){
-        this.setText("");
-        this.setText("Users online:\n");
+    public void updateUsers(Users users) {
         this.users.clear();
-        for(User user : users.getUsers()){
+        for (User user : users.getUsers()) {
             this.users.add(user.getName());
         }
-        this.draw();
+        draw();
     }
 
-    public void addUser(User user){
+    public void addUser(User user) {
         users.add(user.getName());
-        this.draw();
+        draw();
     }
-    public void removeUser(User user){
+
+    public void removeUser(User user) {
         users.remove(user.getName());
-        this.draw();
+        draw();
     }
 
-//    public ArrayList<String> getUsers{
-//        return users;
-//    }
+    public void removeAll(){
+        users.clear();
+        this.textArea.setText("");
+    }
 
+    private void draw() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Users online:\n");
+        for (String user : users) {
+            sb.append(user).append("\n");
+        }
+        textArea.setText(sb.toString());
+        textArea.setCaretPosition(textArea.getDocument().getLength());
+    }
+
+    public JScrollPane getScrollPane() {
+        return scrollPane;
+    }
 }

@@ -1,30 +1,25 @@
 package GUI.readPanels;
 
-import User.Message;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class chatPanel extends JTextArea {
 
     JScrollPane scrollPane = new JScrollPane(this);
-    public chatPanel(){
+
+    public chatPanel() {
         this.setEditable(false);
         this.setLineWrap(true);
-        this.setCaretColor(Color.LIGHT_GRAY);
+        this.setCaretColor(Color.WHITE);
+        this.setVisible(true);
     }
 
-    public void addMessage(Message message){
-        String tempMsg;
-        if(message.getUser().isOnline()){
-            tempMsg = message.getUser().getName() + " " + message.getDate() + ": " + message.getMessage() + "\n";
-        }else {
-            tempMsg = message.getMessage();
+    public void addMessage(String message) {
+        if (message != null) {
+            this.append(message + "\n");  // Append the formatted message
+            this.setCaretPosition(this.getDocument().getLength());  // Ensure the scroll is at the bottom
+            this.revalidate();  // Revalidate the component
+            this.repaint();  // Repaint the component
         }
-        this.append(tempMsg);
-        this.setCaretPosition(this.getDocument().getLength());
-        this.revalidate();
-        this.repaint();
     }
-
 }

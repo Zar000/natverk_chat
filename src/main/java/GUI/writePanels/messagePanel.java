@@ -6,27 +6,29 @@ import javax.swing.*;
 import java.awt.*;
 
 public class messagePanel extends JPanel {
-    JTextArea textArea = new JTextArea(); // content goes here
+    public JTextArea textArea = new JTextArea();
     JScrollPane messageArea = new JScrollPane(textArea);
     sendButton sendButton = new sendButton();
 
     public messagePanel() {
         this.setLayout(new BorderLayout());
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, messageArea, sendButton);
 
-        splitPane.setResizeWeight(1);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, messageArea, sendButton);
+        splitPane.setResizeWeight(0.9);
         splitPane.setDividerSize(4);
         splitPane.setOneTouchExpandable(true);
 
         this.add(splitPane, BorderLayout.CENTER);
-        this.add(sendButton, BorderLayout.EAST);
     }
 
-    public JScrollPane getMessageArea() {
-        return messageArea;
-    }
 
-    public sendButton getSendButton() {
-        return sendButton;
+    public void clearMessage(){
+        textArea.setText("");
+        textArea.revalidate();
+        textArea.repaint();
     }
+    public JScrollPane getMessageArea() { return messageArea; }
+
+    public sendButton getSendButton() { return sendButton; }
+    public JTextArea getTextArea() { return textArea; }
 }
