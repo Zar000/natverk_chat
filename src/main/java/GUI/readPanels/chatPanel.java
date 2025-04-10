@@ -15,6 +15,9 @@ public class chatPanel extends JTextArea {
     }
 
     public void addMessage(String message) {
+        if(message.contains("request-users")){
+            return;
+        }
         if (message != null) {
             this.append(message + "\n");  // Append the formatted message
             this.setCaretPosition(this.getDocument().getLength());  // Ensure the scroll is at the bottom
