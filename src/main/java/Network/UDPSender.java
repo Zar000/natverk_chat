@@ -38,7 +38,6 @@ public class UDPSender {
             byte[] data = message.getBytes();
             DatagramPacket packet = new DatagramPacket(data, data.length, iadr, PORT);
             socket.send(packet);
-            System.out.println("Sent message: " + message);
         }
     }
 
@@ -59,21 +58,20 @@ public class UDPSender {
 
     public void sendAllUsers() throws IOException {
         StringBuilder message = new StringBuilder("current-users:");
-
-        for(String user : allUsers) {
-            message.append(user).append(",");
+        for (int i = 0; i < allUsers.size(); i++) {
+            message.append(allUsers.get(i));
+            if (i < allUsers.size() - 1) {
+                message.append(",");
+            }
         }
-
         sendMessage(message.toString());
     }
-
     private class Receiver implements Runnable {
         private MulticastSocket socket;
 
         public Receiver(MulticastSocket socket) {
             this.socket = socket;
         }
-
         @Override
         public void run() {
             try {
@@ -87,27 +85,24 @@ public class UDPSender {
                     socket.receive(packet);
 
                     String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                    System.out.println("Received message: " + receivedMessage);
 
-                    // Ett protokoll som hanterar inkommande meddelanden
-
-                    // IF message.contains("*användarnamn*-login")
-                    if(receivedMessage.contains("login-")) {
+                    if (receivedMessage.startsWith("login-")) {
                         Matcher matcher = pattern.matcher(receivedMessage);
                         if (matcher.find()) {
                             String username = matcher.group(1);
-                            allUsers.add(username);
-                            sendAllUsers();
-                        } else {
-                            throw new IOException();
+                            if (!allUsers.contains(username)) {
+                                allUsers.add(username);
+                                sendAllUsers();
+                            }
                         }
+                    } else if (receivedMessage.startsWith("logoff-")) {
+                        String username = receivedMessage.split("-")[1];
+                        if (allUsers.remove(username)) {
+                            sendAllUsers();
+                        }
+                    }else if (receivedMessage.equals("request-users")) {
+                        sendAllUsers();
                     }
-
-                    // ELSE IF message.contains("*användarnamn*-logoff")
-                    // removeFromActiveUsers(*användarnamn*)
-                    // sendAllOnlineUsers()
-
-                    // ELSE sendMessageToAllUsers()
                 }
             } catch (IOException e) {
                 e.printStackTrace();

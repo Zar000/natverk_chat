@@ -32,6 +32,12 @@ public class UDPReceiver extends Thread {
         new Thread(new Receiver(socket)).start();
 
         this.sendMessage("login-" + user.getName());
+        try {
+            Thread.sleep(500);
+            sendMessage("request-users");
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
 
         new Thread(() -> {
             try {
@@ -43,8 +49,13 @@ public class UDPReceiver extends Thread {
                 e.printStackTrace();
             }
         }).start();
-
-
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                sendMessage("logoff-" + currentUser.getName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
     public void sendMessage(String message) throws IOException {
@@ -52,10 +63,8 @@ public class UDPReceiver extends Thread {
             byte[] data = message.getBytes();
             DatagramPacket packet = new DatagramPacket(data, data.length, iadr, PORT);
             socket.send(packet);
-            System.out.println("Sent message receiver: " + message);
         }
     }
-
 
     private class Receiver implements Runnable {
         private MulticastSocket socket;
@@ -77,21 +86,29 @@ public class UDPReceiver extends Thread {
                     socket.receive(packet);
 
                     String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-//                    System.out.println("Received message: " + receivedMessage);
-//                    if(receivedMessage.contains("login")){
-//                        String username = receivedMessage.split("-")[1];
-//                        User newUser = new User(username);
-//                        usersPanel.addUser(newUser);
-//                    }
+                    System.out.println("Received message: " + receivedMessage);
+                    if(receivedMessage.contains("login")){
+                        String username = receivedMessage.split("-")[1];
+                        User newUser = new User(username);
+                        usersPanel.addUser(newUser);
+                        continue;
+                    }
 
-                    if(receivedMessage.contains("current-users:")){
+                    if (receivedMessage.startsWith("current-users:")) {
                         String users = receivedMessage.split("current-users:")[1];
                         String[] restOfUsers = users.split(",");
-                        usersPanel.removeAll();
-                        for(String n : restOfUsers){
-                            User newUser = new User(n);
-                            usersPanel.addUser(newUser);
-                        }
+
+                        SwingUtilities.invokeLater(() -> {
+                            usersPanel.removeAll();
+                            for (String name : restOfUsers) {
+                                if (!name.trim().isEmpty()) {
+                                    usersPanel.addUser(new User(name));
+                                }
+                            }
+                            usersPanel.repaint();
+                            usersPanel.revalidate();
+                        });
+                        continue;
                     }
 
                     SwingUtilities.invokeLater(() -> {

@@ -35,8 +35,10 @@ public class usersPanel extends JPanel {
     }
 
     public void addUser(User user) {
-        users.add(user.getName());
-        draw();
+        if (!users.contains(user.getName())) {
+            users.add(user.getName());
+            draw();
+        }
     }
 
     public void removeUser(User user) {
